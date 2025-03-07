@@ -1,7 +1,8 @@
 import ctypes
-from ctypes import wintypes
-import psutil
 import time
+from ctypes import wintypes
+
+import psutil
 
 # Known offsets with their descriptions
 KNOWN_OFFSETS = {
@@ -11,6 +12,7 @@ KNOWN_OFFSETS = {
     0x53a4: "Power output",
     0x53a8: "power drain",
     0x2f4: "Amount of infantry",
+    0x2f8: "aircraft count",
     0x5538: "infantry count",
     0x5588: "infantry count",
     0x53e4: "infantry lost",
@@ -19,7 +21,7 @@ KNOWN_OFFSETS = {
     0x5574: "number of vehicles",
     0x78: "Number of structures placed",
     0x55b0: "total amount of structures placed",
-    0x5560: "Number of structures placed",
+    0x5560: "Number of structures currently has",
     0x5510: "Number of structures (Even ones just in que and not ready. will go back down if cancelled)",
     0x2f0: "Number of structures (Even ones just in que and not ready. will go back down if cancelled)",
     0x270: "Infantry unit just made (1 = conscript, 2 = Tesla Trooper, 7 = Crazy Ivan, 8 = deso, 9 = soviet dog, "
@@ -46,26 +48,31 @@ KNOWN_OFFSETS = {
            "26 = Sov mcv"
            "67 = siege chopper, "
            ")",
-
+0x340: "goes up by 1 when there is a paradrop plane (keeps going up every paradrop)",
     # infantry count
 
     # vehicle count
-    0x158: "Soviet Miners",
-    0x5524: "soviet MCV (Maybe)",
-
-    # plane count
-    0x2f8: "Sov spy plane",
+    0x158: "Miners",
+    0x5524: "vehicle count?",
 
     # building count
-    0x60: "Soviet Construction Yard count",
-    0x90: "Sov service depot",
-    0x15c: "Soviet Ore refinerys",
-    0x160: "Soviet War Factorys",
+    0x60: "Construction Yard count",
+    0x90: "amount of service depot (allied and soviet and civ captured)",
+    0x15c: "Ore refinerys",
+    0x160: "War Factorys",
     0xf0: "Battle bunker count",
     0x537c: "Soviet Barracks count",
-
+0x2d8: "Robot tanks online = 1, offline = 0",
     0x5384: "Soviet Construction Yard count",
-
+0x84: "something to do with service depot?",
+    # total amount of infantry made(includes clicking the icon and stopping)
+    0x32c: "Total amount of Harriers made",
+    0x344: "Total amount of Black eagles made",
+0x78: "no clue goes up slowly when i make structure. like +4 for afc. +1 for allied service depot etc and goes down when you lose stuff",
+0x240: "spysat? when i made it it went from 0->256",
+0x1fc: "not sure about this one changed when made allied engi but only for the first one",
+0x244: "not sure about this one changed when made allied engi but only for the first one",
+0x278:"no clue. changed to 1 when i made first harrier",
     # total amount of infantry made(includes clicking the icon and stopping)
     0x0b30: "Total amount of GI made",
     0x0b34: "Total amount of Conscript made",
@@ -343,7 +350,7 @@ KNOWN_OFFSETS = {
     0x53bc: "when i click a structure this goes super high and back to 0 when i cancel or place (what is being built??) (BLOCKED)",
 
     0x55a4: "went from 0 to super high when i placed tesla reactor (283261376) (BLOCKED)",
-    0x55a8: "went from 0 to 19 when i placed tesla reactor",
+    0x55a8: "goes up the more structures you have? not linear",
     0x55ac: "went from 1 to 257 when i placed tesla reactor",
     0x5724: "went 49918736 -> 259478592 when i placed tesla reactor (BLOCKED)",
     0x575c: "went 9 -> 11 when i placed tesla reactor. 6 -> 9 when i placed second tesla reactor (BLOCKED)",
@@ -359,18 +366,59 @@ KNOWN_OFFSETS = {
 
     0x32f4c: "Timer?? game time??",
     0x1b86c: "Timer?? game time?? (Best one yet)",
+    0x510dc: "Game Timer??",
+    0x1ce54: "Game Timer??",
+0x12c: "went up as soon as i put yuri radar 0 -> 260024688",
+0x130: "went up as soon as i put yuri radar 0 -> 10",
+0x134: "went up as soon as i put yuri radar 1851850753 -> 1851851009",
+0x138: "number of yuri radar",
+0x9c: "when i made a grinder 0 -> 259953408",
+0xa0: "when i made a grinder 0 -> 10 ",
+0xa4:"when i made a grinder 1734934529 -> 1734934785",
+0xa8:"number of grinders",
+0xcc: "when i made tank bunker 0 -> 279128848",
+0xd0:"when i made tank bunker 0 -> 10",
+0xd4:"when i made tank bunker 1702035457 -> 1702035713",
+0xd8:"number of tank bunkers",
+0x70:"when i made second tank bunker 10 -> 20",
+0xc0: "number of bio reactors?",
+0xfc: "when I made bio reactor 0 -> 279125536",
+0x100:"when I made bio reactor 0 -> 10",
+0x104: "when I made bio reactor 774766593 -> 774766849",
+0x108: "when I made bio reactor 0 -> 1",
+0x54e8: "goes up by 200 every miner dump (Ignored)",
+0x5438: "number of buildings lost",
+0x5488: "number of buildings lost",
+0x55d8: "Infantry count???? when i killed sov barracks 79020 -> 144567",
+0x54d8: " keeps going up the more i destroy my own buildings 176669 -> 176696",
+0x5778: "when soviet barracks got destroyed: 257 -> 0",
+0x5380: "number of sov war factorys?",
+0x57bc: "keeps going up when you low power example size jump: 395159 -> 395726",
+0x53b0: "Infantry being built 0 when no. not sure about the number when yes example 47622832",
+0x53b4: "tank being built? 0 when no example when yes 47618368",
+0x160a8: "money spent on infantry",
+0x160ac: "money spent on tanks"
+
 }
 # 0x5c378 (66 = something is ready to be placed, 0 = something is being made, 4266851961 =
 # 0x5c5d4
 # 0x5c598
 # 0x5c614
-IGNORED_OFFSETS = [0x30c, 0x2dc, 0x57a4, 0x57a8, 0x5730, 0x5490, 0x552c, 0x53bc, 0x55a4, 0x5724, 0x5728, 0x5760,
-                   0x5758, 0x5498, 0x5754, 0x557c, 0x32f4c, 0x1b86c]
+IGNORED_OFFSETS = [0x54e8, 0x30c, 0x2dc, 0x57a4, 0x57a8, 0x5730, 0x5490, 0x552c, 0x53bc, 0x55a4, 0x5724, 0x5728, 0x5760,
+                   0x5758, 0x5498, 0x5754, 0x557c, 0x32f4c, 0x1b86c, 0x510dc, 0x1ce54, 0xac05c, 0xac060, 0xac668,
+                   0xac784, 0xac788, 0xacd90, 0xaceac, 0xaceb0, 0xad4b8, 0xac5d4, 0xac5d8, 0xac5f0, 0xac5f4, 0xaccfc,
+                   0xacd00, 0xacd18, 0xacd1c, 0xace80, 0xad424, 0xad428, 0xad440, 0xad444, 0x1706c, 0x1ce84,0x17070, 0x1ce88, 0x175e8
+                   ,0x17604, 0x17600, 0x175e4, 0x2e72c, 0x2e730, 0x34584, 0x2eca8, 0x2ecc4, 0x56d98, 0x56ce0, 0x56cdc, 0x52ef4,
+                   0x52ac8, 0x524bc, 0x51d94, 0x56da0, 0x56ce8, 0x52ef8, 0x524c0, 0x51d98, 0x56d10, 0x56d18, 0x56d14, 0x56d1c
+                   , 0x56d20, 0x56d24, 0x56d80,0x56d18 , 0x56d10, 0x56fa8, 0x56d88, 0x56fa0, 0x56fa4,0x56fac, 0x52310, 0x5232c,
+                   0x52a38, 0x52a54, 0x53470, 0x5348c, 0x47434, 0x47458, 0x4745c, 0x57114, 0x572dc, 0xa208c, 0xa27b4, 0xa2090,0xa27b8
+                   ]
 
 MAXPLAYERS = 8
 INVALIDCLASS = 0xffffffff
-SCAN_SIZE = 0x1000
-START_OFFSET = 0x5c000  # Variable to control how far ahead the scan starts
+SCAN_SIZE = 0x20000
+START_OFFSET = 0x147000  # Variable to control how far ahead the scan startsSCAN_SIZE = 0x10000
+
 INT_SIZE = 4  # Size of an integer in bytes
 
 

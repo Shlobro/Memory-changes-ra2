@@ -30,6 +30,8 @@ KNOWN_OFFSETS = {
     0xc8: "Virus",
 }
 
+#FORCE SHIELD OFFSET   0xffc
+
 IGNORED_OFFSETS = []
 
 MAXPLAYERS = 8
@@ -122,8 +124,10 @@ def read_class_base_mem(game_data):
     classBaseArrayPtr = 0xa8022c
 
     fixedPointValue = ctypes.c_uint32.from_buffer_copy(read_process_memory(process_handle, fixedPoint, 4)).value
-    classBaseArray = ctypes.c_uint32.from_buffer_copy(read_process_memory(process_handle, classBaseArrayPtr, 4)).value
-
+    CBA = ctypes.c_uint32.from_buffer_copy(read_process_memory(process_handle, classBaseArrayPtr, 4)).value
+    print(f"CBA: {hex(CBA)}")
+    # CBA: 0xf499180
+    # CBA: 0xf489020
     classbasearray = fixedPointValue + 1120 * 4
 
     # A flag to track if any changes were detected during the scan
@@ -134,13 +138,18 @@ def read_class_base_mem(game_data):
         classbasearray += 4
         if classBasePtr != INVALIDCLASS:
             game_data.validPlayer[i] = True
-            realClassBasePtr = classBasePtr * 4 + classBaseArray
+            realClassBasePtr = classBasePtr * 4 + CBA
+            print(f"realClassBasePtr: {hex(realClassBasePtr)}")
             realClassBase = ctypes.c_uint32.from_buffer_copy(
                 read_process_memory(process_handle, realClassBasePtr, 4)).value
+
+            print(f"real class base player {i}: {hex(realClassBase)}")
 
             # Get the infantry array pointer using the INFANTRYOFFSET
             infantry_ptr_address = realClassBase + INFANTRYOFFSET
             infantry_array_base_raw = read_process_memory(process_handle, infantry_ptr_address, 4)
+
+
 
             if infantry_array_base_raw is None:
                 # Print message only once for this player
@@ -150,6 +159,8 @@ def read_class_base_mem(game_data):
                 continue  # Skip this player if infantry data is not allocated yet
 
             infantry_array_base = ctypes.c_uint32.from_buffer_copy(infantry_array_base_raw).value
+
+            print(f"infantry array base player {i}: {hex(infantry_array_base)}")
 
             # Initialize or update the memory snapshot
             prev_snapshot = game_data.memorySnapshot[i] if game_data.memorySnapshot[i] is not None else None

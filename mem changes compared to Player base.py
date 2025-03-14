@@ -6,101 +6,98 @@ import psutil
 
 # Known offsets with their descriptions
 KNOWN_OFFSETS = {
-    # other
-    0x2dc: "Credits spent",
-    0x30c: "Balance",
-    0x53a4: "Power output",
-    0x53a8: "power drain",
-    0x2f4: "Amount of infantry",
-    0x2f8: "aircraft count",
-    0x5538: "infantry count",
-    0x5588: "infantry count",
-    0x53e4: "infantry lost",
-    0x5434: "infantry lost",
-    0x2e8: "number of vehicles",
-    0x5574: "number of vehicles",
-    0x78: "Number of structures placed",
-    0x55b0: "total amount of structures placed",
-    0x5560: "Number of structures currently has",
-    0x5510: "Number of structures (Even ones just in que and not ready. will go back down if cancelled)",
-    0x2f0: "Number of structures (Even ones just in que and not ready. will go back down if cancelled)",
-    0x270: "Infantry unit just made (1 = conscript, 2 = Tesla Trooper, 7 = Crazy Ivan, 8 = deso, 9 = soviet dog, "
-           "25 = falk trooper,"
-           "27 = soviet Engi, "
-           "48 = Boris, "
-           ")",
-    0x26c: "Structure just placed (9 = tesla reactor, 10 = sov battle lab, 11 = soviet barracks, "
-           "13 = soviet radar, 14 = sov WF, 15 = soviet Ore ref, 16 = sov wall, 20 = sentry gun, "
-           "24 = iron certain"
-           "26 = sov service depot, "
-           "25 = soviet construction vehicle, 53 = tesla coil, "
-           "54 = Nuke, "
-           "65 = nuke power plant, 67 = flak track, "
-           "310 = industrial plant, 359 = battle bunker)",
-    0x274: "vehicle just made ("
-           "1 = sov war miner, "
-           "2 = apoc, "
-           "3 = rhino tank, "
-           "14 = v3 rocket launcher, "
-           "15 = kirov, "
-           "16 = Terror drone, "
-           "17 = flak track, "
-           "26 = Sov mcv"
-           "67 = siege chopper, "
-           ")",
-0x340: "goes up by 1 when there is a paradrop plane (keeps going up every paradrop)",
-    # infantry count
-
-    # vehicle count
-    0x158: "Miners",
-    0x5524: "vehicle count?",
-
-    # building count
+    0x24: "COUNTRYSTRINGOFFSET",
+    0x34: "HOUSETYPECLASSBASEOFFSET",
     0x60: "Construction Yard count",
+    0x70: "when i made second tank bunker 10 -> 20",
+    0x78: "no clue goes up slowly when i make structure. like +4 for afc. +1 for allied service depot etc and goes down when you lose stuff",
+    0x84: "something to do with service depot?",
+    0x88: "(something to do with service depot",
+    0x8c: "(something to do with service depot",
     0x90: "amount of service depot (allied and soviet and civ captured)",
+    0x9c: "when i made a grinder 0 -> 259953408",
+    0xa0: "when i made a grinder 0 -> 10 ",
+    0xa4: "when i made a grinder 1734934529 -> 1734934785",
+    0xa8: "number of grinders",
+    0xc0: "number of bio reactors?",
+    0xcc: "when i made tank bunker 0 -> 279128848",
+    0xd0: "when i made tank bunker 0 -> 10",
+    0xd4: "when i made tank bunker 1702035457 -> 1702035713",
+    0xd8: "number of tank bunkers",
+    0xe4: "something to do with battle bunker (only first time made)",
+    0xe8: "something to do with battle bunker (only first time made)",
+    0xec: "something to do with battle bunker (only first time made)",
+    0xf0: "Battle bunker count",
+    0xfc: "when I made bio reactor 0 -> 279125536",
+    0x100: "when I made bio reactor 0 -> 10",
+    0x104: "when I made bio reactor 774766593 -> 774766849",
+    0x108: "when I made bio reactor 0 -> 1",
+    0x12c: "went up as soon as i put yuri radar 0 -> 260024688",
+    0x130: "went up as soon as i put yuri radar 0 -> 10",
+    0x134: "went up as soon as i put yuri radar 1851850753 -> 1851851009",
+    0x138: "number of yuri radar",
+    0x144: "somthing to do with industrial plant",
+    0x148: "somthing to do with industrial plant",
+    0x14c: "somthing to do with industrial plant",
+    0x150: "somthing to do with industrial plant (activates the bonus? 1 = active, 0 = not active)",
+    0x158: "Miners",
     0x15c: "Ore refinerys",
     0x160: "War Factorys",
-    0xf0: "Battle bunker count",
-    0x537c: "Soviet Barracks count",
-0x2d8: "Robot tanks online = 1, offline = 0",
-    0x5384: "Soviet Construction Yard count",
-0x84: "something to do with service depot?",
-    # total amount of infantry made(includes clicking the icon and stopping)
-    0x32c: "Total amount of Harriers made",
-    0x344: "Total amount of Black eagles made",
-0x78: "no clue goes up slowly when i make structure. like +4 for afc. +1 for allied service depot etc and goes down when you lose stuff",
-0x240: "spysat? when i made it it went from 0->256",
-0x1fc: "not sure about this one changed when made allied engi but only for the first one",
-0x244: "not sure about this one changed when made allied engi but only for the first one",
-0x278:"no clue. changed to 1 when i made first harrier",
-    # total amount of infantry made(includes clicking the icon and stopping)
-    0x0b30: "Total amount of GI made",
-    0x0b34: "Total amount of Conscript made",
-    0x0b38: "Total amount of Tesla Trooper made",
-    0x0b3c: "Total amount of Allied Engineer made",
-    0x0b40: "Total amount of Rocketeer made",
-    0x0b44: "Total amount of Navy SEAL made",
-    0x0b48: "Total amount of Yuri Clone made",
-    0x0b4c: "Total amount of Crazy Ivan made",
-    0x0b50: "Total amount of Desolator made",
-    0x0b54: "Total amount of Soviet Dog made",
-    0x0b6c: "Total amount of Chrono Legionnaire made",
-    0x0b70: "Total amount of Spy made",
-    0x0b80: "Total amount of Yuri Prime made",
-    0x0b84: "Total amount of Sniper made",
-    0x0b90: "Total amount of Tanya made",
-    0x0b94: "Total amount of Flak Trooper made",
-    0x0b98: "Total amount of Terrorist made",
-    0x0b9c: "Total amount of Soviet Engineer made",
-    0x0ba0: "Total amount of Allied Dog made",
-    0x0be4: "Total amount of Yuri Engineer made",
-    0x0be8: "Total amount of Guardian GI (GGI) made",
-    0x0bec: "Total amount of Initiate made",
-    0x0bf0: "Total amount of Boris made",
-    0x0bf4: "Total amount of Brute made",
-    0x0bf8: "Total amount of Virus made",
 
-    # total amount of vehicles made (includes clicking the icon and stopping)
+    0x1f7: "ISWINNEROFFSET",
+    0x1f8: "ISLOSEROFFSET",
+    0x1fc: "not sure about this one changed when made allied engi but only for the first one",
+    0x240: "spysat? when i made it it went from 0->256",
+    0x244: "not sure about this one changed when made allied engi but only for the first one",
+    0x26c: "Structure just placed (9 = tesla reactor, 10 = sov battle lab, 11 = soviet barracks, 13 = soviet radar, 14 = sov WF, 15 = soviet Ore ref, 16 = sov wall, 20 = sentry gun, 24 = iron certain26 = sov service depot, 25 = soviet construction vehicle, 53 = tesla coil, 54 = Nuke, 65 = nuke power plant, 67 = flak track, 310 = industrial plant, 359 = battle bunker)",
+    0x270: "Infantry unit just made (1 = conscript, 2 = Tesla Trooper, 7 = Crazy Ivan, 8 = deso, 9 = soviet dog, 25 = falk trooper,27 = soviet Engi, 48 = Boris, )",
+    0x274: "vehicle just made (1 = sov war miner, 2 = apoc, 3 = rhino tank, 14 = v3 rocket launcher, 15 = kirov, 16 = Terror drone, 17 = flak track, 26 = Sov mcv67 = siege chopper, )",
+    0x278: "no clue. changed to 1 when i made first harrier",
+    0x2a4: "something to do with force shield",
+    0x2a8: "something to do with force shield",
+    0x2ac: "something to do with force shield",
+    0x2d4: "airport docs (numebr of aircrafts that can be built)",
+    0x2d8: "Robot tanks online = 1, offline = 0",
+    0x2dc: "Credits spent",
+
+
+    0x2e8: "number of vehicles And navy?",
+    0x2ec: "number of Naval units",
+    0x2f0: "Number of structures (Even ones just in que and not ready. will go back down if cancelled)",
+    0x2f4: "Amount of infantry",
+    0x2f8: "aircraft count",
+
+    0x30c: "Balance",
+    0x310: "(has a sov ref?? amount of sov refs??) (starts at 0. + 200 for every extra ore ref. decrements by 200 when sold or destroyed)",
+    0x32c: "Total amount of Harriers made",
+    0x340: "goes up by 1 when there is a paradrop plane (keeps going up every paradrop)",
+    0x344: "Total amount of Black eagles made",
+    0x350: "amount of spy planes made",
+    0xb30: "Total amount of GI made",
+    0xb34: "Total amount of Conscript made",
+    0xb38: "Total amount of Tesla Trooper made",
+    0xb3c: "Total amount of Allied Engineer made",
+    0xb40: "Total amount of Rocketeer made",
+    0xb44: "Total amount of Navy SEAL made",
+    0xb48: "Total amount of Yuri Clone made",
+    0xb4c: "Total amount of Crazy Ivan made",
+    0xb50: "Total amount of Desolator made",
+    0xb54: "Total amount of Soviet Dog made",
+    0xb6c: "Total amount of Chrono Legionnaire made",
+    0xb70: "Total amount of Spy made",
+    0xb80: "Total amount of Yuri Prime made",
+    0xb84: "Total amount of Sniper made",
+    0xb90: "Total amount of Tanya made",
+    0xb94: "Total amount of Flak Trooper made",
+    0xb98: "Total amount of Terrorist made",
+    0xb9c: "Total amount of Soviet Engineer made",
+    0xba0: "Total amount of Allied Dog made",
+    0xbe4: "Total amount of Yuri Engineer made",
+    0xbe8: "Total amount of Guardian GI (GGI) made",
+    0xbec: "Total amount of Initiate made",
+    0xbf0: "Total amount of Boris made",
+    0xbf4: "Total amount of Brute made",
+    0xbf8: "Total amount of Virus made",
     0x1338: "Total amount of Allied MCV made",
     0x133c: "Total amount of War Miners made",
     0x1340: "Total amount of Apocalypse Tanks made",
@@ -141,11 +138,6 @@ KNOWN_OFFSETS = {
     0x144c: "Total amount of Masterminds made",
     0x1450: "Total amount of Flying Discs made",
     0x1458: "Total amount of Robot Tanks made",
-
-    # total amount of planes made (includes clicking the icon and stopping)
-    0x350: "amount of spy planes made",
-
-    # total amount of buildings made (includes clicking the icon and stopping)
     0x1b40: "Total amount of Allied Power Plant ever built",
     0x1b44: "Total amount of Allied Ore Refinery ever built",
     0x1b48: "Total amount of Allied Con Yard ever built",
@@ -198,7 +190,71 @@ KNOWN_OFFSETS = {
     0x20d4: "Total amount of Slave Miner Deployed ever built",
     0x20dc: "Total amount of Battle Bunker ever built",
 
-    # total amount of structures lost
+    0x2b50: "GI lost",
+    0x2b54: "Conscripts lost",
+    0x2b58: "Tesla Troopers lost",
+    0x2b5c: "Allied Engineer lost",
+    0x2b60: "Rocketeer lost",
+    0x2b64: "Navy SEAL lost",
+    0x2b68: "Yuri Clone lost",
+    0x2b6c: "Crazy Ivan lost",
+    0x2b70: "Desolator lost",
+    0x2b74: "Soviet Dog lost",
+    0x2b8c: "Chrono Legionnaire lost",
+    0x2b90: "Spy lost",
+    0x2ba0: "Yuri Prime lost",
+    0x2ba4: "Sniper lost",
+    0x2bb0: "Tanya lost",
+    0x2bb4: "Flak Trooper lost",
+    0x2bb8: "Terrorist lost",
+    0x2bbc: "Soviet Engineer lost",
+    0x2bc0: "Allied Dog lost",
+    0x2c04: "Yuri Engineer lost",
+    0x2c08: "Guardian GI (GGI) lost",
+    0x2c0c: "Initiate lost",
+    0x2c10: "Boris lost",
+    0x2c14: "Brute lost",
+    0x2c18: "Virus lost",
+    0x3358: "Allied MCV lost",
+    0x335c: "War Miner lost",
+    0x3360: "Apocalypse Tank lost",
+    0x3364: "Rhino Tank lost",
+    0x3368: "Soviet Amphibious Transport lost",
+    0x337c: "Grizzly Tank lost",
+    0x338c: "Aircraft Carrier lost",
+    0x3390: "V3 Rocket Launcher lost",
+    0x3394: "Kirov Airship lost",
+    0x3398: "Terror Drone lost",
+    0x339c: "Flak Track lost",
+    0x33a0: "Destroyer lost",
+    0x33a4: "Typhoon Attack Sub lost",
+    0x33a8: "Aegis Cruiser lost",
+    0x33ac: "Allied Amphibious Transport lost",
+    0x33b0: "Dreadnought lost",
+    0x33b4: "NightHawk Transport lost",
+    0x33b8: "Giant Squid lost",
+    0x33bc: "Dolphin lost",
+    0x33c0: "Soviet MCV lost",
+    0x33c4: "Tank Destroyer lost",
+    0x33d4: "Lasher Tank lost",
+    0x33dc: "Chrono Miner lost",
+    0x33e0: "Prism Tank lost",
+    0x33e8: "Sea Scorpion lost",
+    0x33ec: "Mirage Tank lost",
+    0x33f0: "IFV lost",
+    0x33fc: "Demolition Truck lost",
+    0x3434: "Yuri Amphibious Transport lost",
+    0x3438: "Yuri MCV lost",
+    0x343c: "Slave Miner Undeployed lost",
+    0x3448: "Gattling Tank lost",
+    0x344c: "Battle Fortress lost",
+    0x3450: "Chaos Drone lost",
+    0x3454: "Magnetron lost",
+    0x3460: "Boomer lost",
+    0x3464: "Siege Chopper lost",
+    0x346c: "Mastermind lost",
+    0x3470: "Flying Disc lost",
+    0x3478: "Robot Tank lost",
     0x3b60: "Allied Power Plant lost",
     0x3b64: "Allied Ore Refinery lost",
     0x3b68: "Allied Con Yard lost",
@@ -251,173 +307,94 @@ KNOWN_OFFSETS = {
     0x40f4: "Slave Miner Deployed lost",
     0x40fc: "Battle Bunker lost",
 
-    # total amount lost infantry lost
-    0x2b50: "GI lost",
-    0x2b54: "Conscripts lost",
-    0x2b58: "Tesla Troopers lost",
-    0x2b5c: "Allied Engineer lost",
-    0x2b60: "Rocketeer lost",
-    0x2b64: "Navy SEAL lost",
-    0x2b68: "Yuri Clone lost",
-    0x2b6c: "Crazy Ivan lost",
-    0x2b70: "Desolator lost",
-    0x2b74: "Soviet Dog lost",
-    0x2b8c: "Chrono Legionnaire lost",
-    0x2b90: "Spy lost",
-    0x2ba0: "Yuri Prime lost",
-    0x2ba4: "Sniper lost",
-    0x2bb0: "Tanya lost",
-    0x2bb4: "Flak Trooper lost",
-    0x2bb8: "Terrorist lost",
-    0x2bbc: "Soviet Engineer lost",
-    0x2bc0: "Allied Dog lost",
-    0x2c04: "Yuri Engineer lost",
-    0x2c08: "Guardian GI (GGI) lost",
-    0x2c0c: "Initiate lost",
-    0x2c10: "Boris lost",
-    0x2c14: "Brute lost",
-    0x2c18: "Virus lost",
+    #0x5378: "num of airpads",
+    0x537c: "Barracks count",
+    0x5380: "war factorys?",
+    0x5384: "Construction Yard count",
+    #0x5388: "num of shipyards",
+    #0x0x538c: "num of ore purifiers",
+    0x53a4: "Power output",
+    0x53a8: "power drain",
 
-    # total amount of vehicles lost
-    0x3358: "Allied MCV lost",
-    0x335c: "War Miner lost",
-    0x3360: "Apocalypse Tank lost",
-    0x3364: "Rhino Tank lost",
-    0x3368: "Soviet Amphibious Transport lost",
-    0x337c: "Grizzly Tank lost",
-    0x338c: "Aircraft Carrier lost",
-    0x3390: "V3 Rocket Launcher lost",
-    0x3394: "Kirov Airship lost",
-    0x3398: "Terror Drone lost",
-    0x339c: "Flak Track lost",
-    0x33a0: "Destroyer lost",
-    0x33a4: "Typhoon Attack Sub lost",
-    0x33a8: "Aegis Cruiser lost",
-    0x33ac: "Allied Amphibious Transport lost",
-    0x33b0: "Dreadnought lost",
-    0x33b4: "NightHawk Transport lost",
-    0x33b8: "Giant Squid lost",
-    0x33bc: "Dolphin lost",
-    0x33c0: "Soviet MCV lost",
-    0x33c4: "Tank Destroyer lost",
-    0x33d4: "Lasher Tank lost",
-    0x33dc: "Chrono Miner lost",
-    0x33e0: "Prism Tank lost",
-    0x33e8: "Sea Scorpion lost",
-    0x33ec: "Mirage Tank lost",
-    0x33f0: "IFV lost",
-    0x33fc: "Demolition Truck lost",
-    0x3434: "Yuri Amphibious Transport lost",
-    0x3438: "Yuri MCV lost",
-    0x343c: "Slave Miner Undeployed lost",
-    0x3448: "Gattling Tank lost",
-    0x344c: "Battle Fortress lost",
-    0x3450: "Chaos Drone lost",
-    0x3454: "Magnetron lost",
-    0x3460: "Boomer lost",
-    0x3464: "Siege Chopper lost",
-    0x346c: "Mastermind lost",
-    0x3470: "Flying Disc lost",
-    0x3478: "Robot Tank lost",
+0x53ac: "aircraft pointer offset",
 
-    # useless wierd
+    #this si where the primary things are! like primary WF
 
-    # puzzling
-    0x310: "(has a sov ref?? amount of sov refs??) (starts at 0. + 200 for every extra ore ref. decrements by 200 when sold or destroyed)",
-    0x88: "(something to do with service depot",
-    0x8c: "(something to do with service depot",
-
-    0x144: "somthing to do with industrial plant",
-    0x148: "somthing to do with industrial plant",
-    0x14c: "somthing to do with industrial plant",
-    0x150: "somthing to do with industrial plant (activates the bonus? 1 = active, 0 = not active)",
-
-    0x2a4: "something to do with force shield",
-    0x2a8: "something to do with force shield",
-    0x2ac: "something to do with force shield",
-
-    0xe4: "something to do with battle bunker (only first time made)",
-    0xe8: "something to do with battle bunker (only first time made)",
-    0xec: "something to do with battle bunker (only first time made)",
-
-    0x57a4: "Adds around 360 every second (Game time?)",
-
-    0x57a8: "scrolling around the map???",
-
-    0x5490: "(changes to huge number when undeployed and 0 when deployed) (Also changes to a huge number when placing tesla reactor and selling reactor as well). (then i blocked it)",
-    0x5730: "deploying soviet mcv makes this 20, undeploying makes this 0. then i placed a tesla reactor and it turned 30 selling made it 20 again (then i blocked it)",
-
+    0x53b0: "Infantry being built 0 when no. not sure about the number when yes example 47622832",
+    0x53b4: "tank being built? 0 when no example when yes 47618368",
     0x53bc: "when i click a structure this goes super high and back to 0 when i cancel or place (what is being built??) (BLOCKED)",
-
-    0x55a4: "went from 0 to super high when i placed tesla reactor (283261376) (BLOCKED)",
-    0x55a8: "goes up the more structures you have? not linear",
-    0x55ac: "went from 1 to 257 when i placed tesla reactor",
-    0x5724: "went 49918736 -> 259478592 when i placed tesla reactor (BLOCKED)",
-    0x575c: "went 9 -> 11 when i placed tesla reactor. 6 -> 9 when i placed second tesla reactor (BLOCKED)",
-    0x5728: "went 20 -> 30 when i placed tesla reactor. 30 -> 50 when i placed second tesla reactor (BLOCKED)",
-    0x5760: "went 6 -> 10 when i placed tesla reactor. 10 -> 14 when i placed second tesla reactor (BLOCKED)",
-    0x5758: "went 25 -> 21 when i placed second tesla reactor (BLOCKED)",
-
+    0x53e4: "infantry lost",
+    0x5434: "infantry lost",
+    0x5438: "number of buildings lost",
+    0x5488: "number of buildings lost",
+    0x5490: "(changes to huge number when undeployed and 0 when deployed) (Also changes to a huge number when placing tesla reactor and selling reactor as well). (then i blocked it)",
+    0x54d8: " keeps going up the more i destroy my own buildings 176669 -> 176696",
+    0x54e8: "goes up by 200 every miner dump (Ignored)",
+    0x5510: "Number of structures (Even ones just in que and not ready. will go back down if cancelled)",
+    0x5524: "vehicle count?",
     0x552c: "went 0 -> 285645296 when i sold tesla reactor (Blocked)",
     0x5530: "went 0 -> 11 when i sold tesla reactor",
     0x5534: "went 1 -> 257 when i sold tesla reactor",
+    0x5538: "infantry count",
+    0x5560: "Number of structures currently has",
+    0x5574: "number of vehicles",
 
-    0x557c: "went 0 -> 285644624 when i sold tesla reactor (BLOCKED)",
+0x5554:"BUILDINGOFFSET",
+0x5568:"TANKOFFSET",
+    0x557c: "INFOFFSET",
+0x5590:"AIRCRAFTOFFSET",
+0x55A4: "Total made Buildings Offset",
+0x55B8: "Total made Tanks Offset",
+0x55CC: "Total made Inf Offset",
+0x55E0: "Total made Aircraft Offset",
 
-    0x32f4c: "Timer?? game time??",
-    0x1b86c: "Timer?? game time?? (Best one yet)",
-    0x510dc: "Game Timer??",
-    0x1ce54: "Game Timer??",
-0x12c: "went up as soon as i put yuri radar 0 -> 260024688",
-0x130: "went up as soon as i put yuri radar 0 -> 10",
-0x134: "went up as soon as i put yuri radar 1851850753 -> 1851851009",
-0x138: "number of yuri radar",
-0x9c: "when i made a grinder 0 -> 259953408",
-0xa0: "when i made a grinder 0 -> 10 ",
-0xa4:"when i made a grinder 1734934529 -> 1734934785",
-0xa8:"number of grinders",
-0xcc: "when i made tank bunker 0 -> 279128848",
-0xd0:"when i made tank bunker 0 -> 10",
-0xd4:"when i made tank bunker 1702035457 -> 1702035713",
-0xd8:"number of tank bunkers",
-0x70:"when i made second tank bunker 10 -> 20",
-0xc0: "number of bio reactors?",
-0xfc: "when I made bio reactor 0 -> 279125536",
-0x100:"when I made bio reactor 0 -> 10",
-0x104: "when I made bio reactor 774766593 -> 774766849",
-0x108: "when I made bio reactor 0 -> 1",
-0x54e8: "goes up by 200 every miner dump (Ignored)",
-0x5438: "number of buildings lost",
-0x5488: "number of buildings lost",
-0x55d8: "Infantry count???? when i killed sov barracks 79020 -> 144567",
-0x54d8: " keeps going up the more i destroy my own buildings 176669 -> 176696",
-0x5778: "when soviet barracks got destroyed: 257 -> 0",
-0x5380: "number of sov war factorys?",
-0x57bc: "keeps going up when you low power example size jump: 395159 -> 395726",
-0x53b0: "Infantry being built 0 when no. not sure about the number when yes example 47622832",
-0x53b4: "tank being built? 0 when no example when yes 47618368",
-0x160a8: "money spent on infantry",
-0x160ac: "money spent on tanks"
 
+
+
+
+
+    0x5588: "infantry count",
+    0x55a4: "went from 0 to super high when i placed tesla reactor (283261376) (BLOCKED)",
+    0x55a8: "goes up the more structures you have? not linear",
+    0x55ac: "went from 1 to 257 when i placed tesla reactor",
+    0x55b0: "total amount of structures placed",
+    0x55d8: "Infantry count???? when i killed sov barracks 79020 -> 144567",
+    0x5724: "went 49918736 -> 259478592 when i placed tesla reactor (BLOCKED)",
+    0x5728: "went 20 -> 30 when i placed tesla reactor. 30 -> 50 when i placed second tesla reactor (BLOCKED)",
+    0x5730: "deploying soviet mcv makes this 20, undeploying makes this 0. then i placed a tesla reactor and it turned 30 selling made it 20 again (then i blocked it)",
+    0x5758: "went 25 -> 21 when i placed second tesla reactor (BLOCKED)",
+    0x575c: "went 9 -> 11 when i placed tesla reactor. 6 -> 9 when i placed second tesla reactor (BLOCKED)",
+    0x5760: "went 6 -> 10 when i placed tesla reactor. 10 -> 14 when i placed second tesla reactor (BLOCKED)",
+    0x5778: "when soviet barracks got destroyed: 257 -> 0",
+    0x57a4: "Adds around 360 every second (Game time?)",
+    0x57a8: "scrolling around the map???",
+    0x57bc: "keeps going up when you low power example size jump: 395159 -> 395726",
+    0x1602a: "player name",
+    0x16054: "color scheme",
+    0x160a8: "money spent on infantry",
+    0x160ac: "money spent on tanks",
+    #0x160b0: "TotalOwnedAircraftCost",
+    #0x160b4: "PowerSurplus",
+# this is the last address no point in going beyond this
 }
-# 0x5c378 (66 = something is ready to be placed, 0 = something is being made, 4266851961 =
-# 0x5c5d4
-# 0x5c598
-# 0x5c614
-IGNORED_OFFSETS = [0x54e8, 0x30c, 0x2dc, 0x57a4, 0x57a8, 0x5730, 0x5490, 0x552c, 0x53bc, 0x55a4, 0x5724, 0x5728, 0x5760,
+
+IGNORED_OFFSETS = [0x54e8, 0x57a4, 0x57a8, 0x5730, 0x5490, 0x552c, 0x53bc, 0x55a4, 0x5724, 0x5728, 0x5760,
                    0x5758, 0x5498, 0x5754, 0x557c, 0x32f4c, 0x1b86c, 0x510dc, 0x1ce54, 0xac05c, 0xac060, 0xac668,
                    0xac784, 0xac788, 0xacd90, 0xaceac, 0xaceb0, 0xad4b8, 0xac5d4, 0xac5d8, 0xac5f0, 0xac5f4, 0xaccfc,
-                   0xacd00, 0xacd18, 0xacd1c, 0xace80, 0xad424, 0xad428, 0xad440, 0xad444, 0x1706c, 0x1ce84,0x17070, 0x1ce88, 0x175e8
-                   ,0x17604, 0x17600, 0x175e4, 0x2e72c, 0x2e730, 0x34584, 0x2eca8, 0x2ecc4, 0x56d98, 0x56ce0, 0x56cdc, 0x52ef4,
-                   0x52ac8, 0x524bc, 0x51d94, 0x56da0, 0x56ce8, 0x52ef8, 0x524c0, 0x51d98, 0x56d10, 0x56d18, 0x56d14, 0x56d1c
-                   , 0x56d20, 0x56d24, 0x56d80,0x56d18 , 0x56d10, 0x56fa8, 0x56d88, 0x56fa0, 0x56fa4,0x56fac, 0x52310, 0x5232c,
-                   0x52a38, 0x52a54, 0x53470, 0x5348c, 0x47434, 0x47458, 0x4745c, 0x57114, 0x572dc, 0xa208c, 0xa27b4, 0xa2090,0xa27b8
+                   0xacd00, 0xacd18, 0xacd1c, 0xace80, 0xad424, 0xad428, 0xad440, 0xad444, 0x1706c, 0x1ce84, 0x17070,
+                   0x1ce88, 0x175e8
+    , 0x17604, 0x17600, 0x175e4, 0x2e72c, 0x2e730, 0x34584, 0x2eca8, 0x2ecc4, 0x56d98, 0x56ce0, 0x56cdc, 0x52ef4,
+                   0x52ac8, 0x524bc, 0x51d94, 0x56da0, 0x56ce8, 0x52ef8, 0x524c0, 0x51d98, 0x56d10, 0x56d18, 0x56d14,
+                   0x56d1c
+    , 0x56d20, 0x56d24, 0x56d80, 0x56d18, 0x56d10, 0x56fa8, 0x56d88, 0x56fa0, 0x56fa4, 0x56fac, 0x52310, 0x5232c,
+                   0x52a38, 0x52a54, 0x53470, 0x5348c, 0x47434, 0x47458, 0x4745c, 0x57114, 0x572dc, 0xa208c, 0xa27b4,
+                   0xa2090, 0xa27b8
                    ]
 
 MAXPLAYERS = 8
 INVALIDCLASS = 0xffffffff
-SCAN_SIZE = 0x20000
-START_OFFSET = 0x147000  # Variable to control how far ahead the scan startsSCAN_SIZE = 0x10000
+SCAN_SIZE = 0x100
+START_OFFSET = 0x208  # Variable to control how far ahead the scan startsSCAN_SIZE = 0x10000
 
 INT_SIZE = 4  # Size of an integer in bytes
 
@@ -495,7 +472,7 @@ def read_class_base_mem(game_data):
     classBaseArrayPtr = 0xa8022c
 
     fixedPointValue = ctypes.c_uint32.from_buffer_copy(read_process_memory(process_handle, fixedPoint, 4)).value
-    classBaseArray = ctypes.c_uint32.from_buffer_copy(read_process_memory(process_handle, classBaseArrayPtr, 4)).value
+    CBA = ctypes.c_uint32.from_buffer_copy(read_process_memory(process_handle, classBaseArrayPtr, 4)).value
 
     classbasearray = fixedPointValue + 1120 * 4
 
@@ -507,7 +484,7 @@ def read_class_base_mem(game_data):
         classbasearray += 4
         if classBasePtr != INVALIDCLASS:
             game_data.validPlayer[i] = True
-            realClassBasePtr = classBasePtr * 4 + classBaseArray
+            realClassBasePtr = classBasePtr * 4 + CBA
             realClassBase = ctypes.c_uint32.from_buffer_copy(
                 read_process_memory(process_handle, realClassBasePtr, 4)).value
 

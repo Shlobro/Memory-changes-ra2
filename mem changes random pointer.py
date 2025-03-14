@@ -1,28 +1,26 @@
-
-
 import ctypes
 import psutil
 import time
 from ctypes import wintypes
 
 KNOWN_OFFSETS = {
-0x4: "Harrier",
-0x1c: "Black Eagle"
+0x24: "how much out of 54 is complete",
+0x60: "Money left to complete this"
 }
 
 IGNORED_OFFSETS = []
 
 MAXPLAYERS = 8
 INVALIDCLASS = 0xffffffff
-producingbuildingoffset = 0x564c  # Offset to get the aircraft array pointer
-SCAN_SIZE = 0x100  # The size of the memory range we want to scan (4KB)
+RANDOMPTROFFSET = 0x53b0  # Offset to get the tanks/units array pointer
+SCAN_SIZE = 0x200  # The size of the memory range we want to scan (4KB)
 INT_SIZE = 4  # Size of an integer in bytes
 
 
 class GameData:
     def __init__(self):
         self.validPlayer = [False] * MAXPLAYERS
-        self.building_not_allocated = [False] * MAXPLAYERS  # Flag to track if memory not allocated was printed
+        self.units_not_allocated = [False] * MAXPLAYERS  # Flag to track if memory not allocated was printed
         self.currentGameRunning = False
         self.memorySnapshot = [None] * SCAN_SIZE
 
@@ -49,13 +47,13 @@ def read_process_memory(process_handle, address, size):
             raise
 
 
-def scan_memory_changes(process_handle, building_array_base, prev_snapshot):
+def scan_memory_changes(process_handle, unit_array_base, prev_snapshot):
     current_snapshot = []
     changes = []
 
-    # Iterate over the range starting from building_array_base
+    # Iterate over the range starting from unit_array_base
     for offset in range(0, SCAN_SIZE, INT_SIZE):
-        address = building_array_base + offset
+        address = unit_array_base + offset
         try:
             # Read the current integer value from memory
             current_value_raw = read_process_memory(process_handle, address, INT_SIZE)
@@ -118,32 +116,26 @@ def read_class_base_mem(game_data):
             realClassBase = ctypes.c_uint32.from_buffer_copy(
                 read_process_memory(process_handle, realClassBasePtr, 4)).value
 
-            # Get the building array pointer using the BUILDINGOFFSET
-            building_ptr_address = realClassBase + producingbuildingoffset
-            building_array_base_raw = read_process_memory(process_handle, building_ptr_address, 4)
+            # Get the tanks/units array pointer using the TANKOFFSET
+            unit_ptr_address = realClassBase + RANDOMPTROFFSET
+            unit_array_base_raw = read_process_memory(process_handle, unit_ptr_address, 4)
 
-            # Print the producing building address and the value it points to
-            print(f"Player {i} - Producing building pointer address: {hex(building_ptr_address)}")
-
-            if building_array_base_raw is None:
+            if unit_array_base_raw is None:
                 # Print message only once for this player
-                if not game_data.building_not_allocated[i]:
-                    print(f"Player {i} - No building data allocated yet.")
-                    game_data.building_not_allocated[i] = True
-                continue  # Skip this player if building data is not allocated yet
+                if not game_data.units_not_allocated[i]:
+                    print(f"Player {i} - No units/tanks data allocated yet.")
+                    game_data.units_not_allocated[i] = True
+                continue  # Skip this player if unit data is not allocated yet
 
-            building_array_base = ctypes.c_uint32.from_buffer_copy(building_array_base_raw).value
-
-            # Print the address that the producing building pointer points to
-            print(f"Player {i} - Building array base address: {hex(building_array_base)}")
+            unit_array_base = ctypes.c_uint32.from_buffer_copy(unit_array_base_raw).value
 
             # Initialize or update the memory snapshot
             prev_snapshot = game_data.memorySnapshot[i] if game_data.memorySnapshot[i] is not None else None
-            current_snapshot, changes = scan_memory_changes(process_handle, building_array_base, prev_snapshot)
+            current_snapshot, changes = scan_memory_changes(process_handle, unit_array_base, prev_snapshot)
             game_data.memorySnapshot[i] = current_snapshot
 
             # Reset the flag if the memory has been allocated
-            game_data.building_not_allocated[i] = False
+            game_data.units_not_allocated[i] = False
 
             # Report any changes
             if changes:  # Check if there are any changes for this player
@@ -157,6 +149,7 @@ def read_class_base_mem(game_data):
     # If any changes occurred during this tick, print a new line
     if any_changes:
         print()  # Print an empty line to separate the changes for each tick
+
 
 def ra2_main():
     game_data = GameData()

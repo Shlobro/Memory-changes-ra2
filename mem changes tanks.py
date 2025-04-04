@@ -156,7 +156,10 @@ def read_class_base_mem(game_data):
 
             # Get the tanks/units array pointer using the TANKOFFSET
             unit_ptr_address = realClassBase + TANKOFFSET
+
+            print("!!!!", hex(realClassBase + 0x5644))
             unit_array_base_raw = read_process_memory(process_handle, unit_ptr_address, 4)
+
 
             if unit_array_base_raw is None:
                 # Print message only once for this player
@@ -166,7 +169,6 @@ def read_class_base_mem(game_data):
                 continue  # Skip this player if unit data is not allocated yet
 
             unit_array_base = ctypes.c_uint32.from_buffer_copy(unit_array_base_raw).value
-
             # Initialize or update the memory snapshot
             prev_snapshot = game_data.memorySnapshot[i] if game_data.memorySnapshot[i] is not None else None
             current_snapshot, changes = scan_memory_changes(process_handle, unit_array_base, prev_snapshot)

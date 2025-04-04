@@ -44,35 +44,65 @@ KNOWN_OFFSETS = {
     0x15c: "Ore refinerys",
     0x160: "War Factorys",
 
+    0x164: "InfantrySelfHeal",
+    0x168: "UnitsSelfHeal",
+    0x1ed: "IsInPlayerControl", ##TODO make sure
+    0x1f6: "IsGameOver",
     0x1f7: "ISWINNEROFFSET",
     0x1f8: "ISLOSEROFFSET",
+
     0x1fc: "not sure about this one changed when made allied engi but only for the first one",
     0x240: "spysat? when i made it it went from 0->256",
     0x244: "not sure about this one changed when made allied engi but only for the first one",
+
+
+#TODO this is the spot that has DECLARE_PROPERTY(DynamicVectorClass<SuperClass*>, Supers);
     0x26c: "Structure just placed (9 = tesla reactor, 10 = sov battle lab, 11 = soviet barracks, 13 = soviet radar, 14 = sov WF, 15 = soviet Ore ref, 16 = sov wall, 20 = sentry gun, 24 = iron certain26 = sov service depot, 25 = soviet construction vehicle, 53 = tesla coil, 54 = Nuke, 65 = nuke power plant, 67 = flak track, 310 = industrial plant, 359 = battle bunker)",
     0x270: "Infantry unit just made (1 = conscript, 2 = Tesla Trooper, 7 = Crazy Ivan, 8 = deso, 9 = soviet dog, 25 = falk trooper,27 = soviet Engi, 48 = Boris, )",
     0x274: "vehicle just made (1 = sov war miner, 2 = apoc, 3 = rhino tank, 14 = v3 rocket launcher, 15 = kirov, 16 = Terror drone, 17 = flak track, 26 = Sov mcv67 = siege chopper, )",
-    0x278: "no clue. changed to 1 when i made first harrier",
+    0x278: "aircraft just made", # TODO this is swapped with vehicle in the houseClass.h
+
+#     DECLARE_PROPERTY(CDTimerClass, RepairTimer); // for AI
+# DECLARE_PROPERTY(CDTimerClass, AlertTimer);
+# DECLARE_PROPERTY(CDTimerClass, BorrowedTime);
+# DECLARE_PROPERTY(CDTimerClass, PowerBlackoutTimer);
     0x2a4: "something to do with force shield",
     0x2a8: "something to do with force shield",
     0x2ac: "something to do with force shield",
+# DECLARE_PROPERTY(CDTimerClass, RadarBlackoutTimer);
+
+
+
+
+0x2bc: "Yuri battle lab inflitrated (1=yes 0=no)",
+0x2bd:"Soviet battle lab inflitrated (1=yes 0=no)",
+0x2be: "Allied battle lab inflitrated (1=yes 0=no)",
+0x2bf:                 "BarracksInfiltrated (0 if not)",
+0x2c0:                "WarFactoryInfiltrated (0 if not)",
+
+
+
     0x2d4: "airport docs (numebr of aircrafts that can be built)",
     0x2d8: "Robot tanks online = 1, offline = 0",
     0x2dc: "Credits spent",
+    0x2e0: "HarvestedCredits",
+    0x2e4: "StolenBuildingsCredits",
 
 
-    0x2e8: "number of vehicles And navy?",
+    0x2e8: "number of vehicles And navy?", ## TODO make sure this is also navy
     0x2ec: "number of Naval units",
     0x2f0: "Number of structures (Even ones just in que and not ready. will go back down if cancelled)",
     0x2f4: "Amount of infantry",
     0x2f8: "aircraft count",
 
     0x30c: "Balance",
-    0x310: "(has a sov ref?? amount of sov refs??) (starts at 0. + 200 for every extra ore ref. decrements by 200 when sold or destroyed)",
+
+
     0x32c: "Total amount of Harriers made",
     0x340: "goes up by 1 when there is a paradrop plane (keeps going up every paradrop)",
     0x344: "Total amount of Black eagles made",
     0x350: "amount of spy planes made",
+
     0xb30: "Total amount of GI made",
     0xb34: "Total amount of Conscript made",
     0xb38: "Total amount of Tesla Trooper made",
@@ -98,6 +128,7 @@ KNOWN_OFFSETS = {
     0xbf0: "Total amount of Boris made",
     0xbf4: "Total amount of Brute made",
     0xbf8: "Total amount of Virus made",
+
     0x1338: "Total amount of Allied MCV made",
     0x133c: "Total amount of War Miners made",
     0x1340: "Total amount of Apocalypse Tanks made",
@@ -138,6 +169,7 @@ KNOWN_OFFSETS = {
     0x144c: "Total amount of Masterminds made",
     0x1450: "Total amount of Flying Discs made",
     0x1458: "Total amount of Robot Tanks made",
+
     0x1b40: "Total amount of Allied Power Plant ever built",
     0x1b44: "Total amount of Allied Ore Refinery ever built",
     0x1b48: "Total amount of Allied Con Yard ever built",
@@ -189,6 +221,8 @@ KNOWN_OFFSETS = {
     0x20d0: "Total amount of Robot Control Center ever built",
     0x20d4: "Total amount of Slave Miner Deployed ever built",
     0x20dc: "Total amount of Battle Bunker ever built",
+
+    #TODO missing the aircraft lost here
 
     0x2b50: "GI lost",
     0x2b54: "Conscripts lost",
@@ -313,14 +347,17 @@ KNOWN_OFFSETS = {
     0x5384: "Construction Yard count",
     #0x5388: "num of shipyards",
     #0x0x538c: "num of ore purifiers",
+
     0x53a4: "Power output",
     0x53a8: "power drain",
 
-0x53ac: "aircraft pointer offset",
+0x53ac: "aircraft factory pointer offset",
+
+0x53b0: "Unit factory pointer offset",
+
 
     #this si where the primary things are! like primary WF
 
-    0x53b0: "Infantry being built 0 when no. not sure about the number when yes example 47622832",
     0x53b4: "tank being built? 0 when no example when yes 47618368",
     0x53bc: "when i click a structure this goes super high and back to 0 when i cancel or place (what is being built??) (BLOCKED)",
     0x53e4: "infantry lost",
@@ -343,6 +380,8 @@ KNOWN_OFFSETS = {
 0x5568:"TANKOFFSET",
     0x557c: "INFOFFSET",
 0x5590:"AIRCRAFTOFFSET",
+
+
 0x55A4: "Total made Buildings Offset",
 0x55B8: "Total made Tanks Offset",
 0x55CC: "Total made Inf Offset",
@@ -359,6 +398,9 @@ KNOWN_OFFSETS = {
     0x55ac: "went from 1 to 257 when i placed tesla reactor",
     0x55b0: "total amount of structures placed",
     0x55d8: "Infantry count???? when i killed sov barracks 79020 -> 144567",
+
+
+
     0x5724: "went 49918736 -> 259478592 when i placed tesla reactor (BLOCKED)",
     0x5728: "went 20 -> 30 when i placed tesla reactor. 30 -> 50 when i placed second tesla reactor (BLOCKED)",
     0x5730: "deploying soviet mcv makes this 20, undeploying makes this 0. then i placed a tesla reactor and it turned 30 selling made it 20 again (then i blocked it)",
@@ -393,10 +435,10 @@ IGNORED_OFFSETS = [0x54e8, 0x57a4, 0x57a8, 0x5730, 0x5490, 0x552c, 0x53bc, 0x55a
 
 MAXPLAYERS = 8
 INVALIDCLASS = 0xffffffff
-SCAN_SIZE = 0x100
-START_OFFSET = 0x208  # Variable to control how far ahead the scan startsSCAN_SIZE = 0x10000
+SCAN_SIZE = 0x30
+START_OFFSET = 0x2ac  # Variable to control how far ahead the scan startsSCAN_SIZE = 0x10000
 
-INT_SIZE = 4  # Size of an integer in bytes
+SIZE_TO_READ = 1
 
 
 class GameData:
@@ -428,12 +470,21 @@ def scan_memory_changes(process_handle, realClassBase, prev_snapshot):
     changes = []
 
     # Iterate over the range starting from realClassBase + START_OFFSET
-    for offset in range(START_OFFSET, START_OFFSET + SCAN_SIZE, INT_SIZE):
+    for offset in range(START_OFFSET, START_OFFSET + SCAN_SIZE, SIZE_TO_READ):
         address = realClassBase + offset
         try:
-            # Read the current integer value from memory
-            current_value = ctypes.c_uint32.from_buffer_copy(
-                read_process_memory(process_handle, address, INT_SIZE)).value
+            raw = read_process_memory(process_handle, address, SIZE_TO_READ)
+
+            if SIZE_TO_READ == 1:
+                current_value = raw[0]  # interpret as single byte (unsigned)
+            elif SIZE_TO_READ == 2:
+                current_value = int.from_bytes(raw, byteorder='little', signed=False)
+            elif SIZE_TO_READ == 4:
+                current_value = int.from_bytes(raw, byteorder='little', signed=False)
+            else:
+                # optionally support signed or larger types
+                current_value = int.from_bytes(raw, byteorder='little', signed=False)
+
             current_snapshot.append(current_value)
 
             # Skip processing if the offset is in the ignored list
@@ -442,7 +493,7 @@ def scan_memory_changes(process_handle, realClassBase, prev_snapshot):
 
             # If this is not the first snapshot, compare with the previous snapshot
             if prev_snapshot is not None:
-                prev_value = prev_snapshot[(offset - START_OFFSET) // INT_SIZE]
+                prev_value = prev_snapshot[(offset - START_OFFSET) // SIZE_TO_READ]
                 if current_value != prev_value:
                     # A change is detected, record the change
                     description = KNOWN_OFFSETS.get(offset, None)

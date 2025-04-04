@@ -4,8 +4,11 @@ import time
 from ctypes import wintypes
 
 KNOWN_OFFSETS = {
-0x24: "how much out of 54 is complete",
-0x60: "Money left to complete this"
+    0x24: "how much out of 54 is complete",
+    0x44: "this is the pointer to the array on the queue", # TODO then treat each pointer as 4 bytes the first one is the one in queue after the one being built. go through that pointer and read at 0x64 20 bytes as string and that is the name of the unit in queue or as 25 or 33 or 50??
+    0x50: "how many units on the queue",
+    0x5c: "OnHold; // paused when out of money, restored when funds available", #BOOL
+    0x60: "Money left to complete this"
 }
 
 IGNORED_OFFSETS = []
@@ -22,7 +25,7 @@ class GameData:
         self.validPlayer = [False] * MAXPLAYERS
         self.units_not_allocated = [False] * MAXPLAYERS  # Flag to track if memory not allocated was printed
         self.currentGameRunning = False
-        self.memorySnapshot = [None] * SCAN_SIZE
+        self.memorySnapshot = [None] * MAXPLAYERS  # Updated to be per player
 
 
 def find_pid_by_name(name):
@@ -116,7 +119,7 @@ def read_class_base_mem(game_data):
             realClassBase = ctypes.c_uint32.from_buffer_copy(
                 read_process_memory(process_handle, realClassBasePtr, 4)).value
 
-            # Get the tanks/units array pointer using the TANKOFFSET
+            # Get the tanks/units array pointer using the RANDOMPTROFFSET
             unit_ptr_address = realClassBase + RANDOMPTROFFSET
             unit_array_base_raw = read_process_memory(process_handle, unit_ptr_address, 4)
 
@@ -128,6 +131,9 @@ def read_class_base_mem(game_data):
                 continue  # Skip this player if unit data is not allocated yet
 
             unit_array_base = ctypes.c_uint32.from_buffer_copy(unit_array_base_raw).value
+
+            # Print the address after landing on the random pointer offset
+            print(f"Player {i} - Scanning memory at address {hex(unit_array_base)}")
 
             # Initialize or update the memory snapshot
             prev_snapshot = game_data.memorySnapshot[i] if game_data.memorySnapshot[i] is not None else None

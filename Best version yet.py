@@ -321,7 +321,9 @@ def initialize_players(game_data, process_handle):
             print(f"Player {i} country name {player.country_name.value.decode('utf-8')}")
 
             # Set the username
+
             userNamePtr = realClassBase + USERNAMEOFFSET
+            print("!!!!!!!!!!!!!!", hex(userNamePtr))
             username_data = read_process_memory(process_handle, userNamePtr, 0x20)
             if username_data is None:
                 print(f"Skipping username assignment for player {i} due to incomplete memory read.")

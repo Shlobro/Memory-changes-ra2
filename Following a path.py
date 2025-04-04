@@ -1,8 +1,45 @@
 import ctypes
 import psutil
+import time
 from ctypes import wintypes
 
+# Global constants and offsets
+MAXPLAYERS = 8
 INVALIDCLASS = 0xffffffff
+
+# Base offset from player base for infantry factory
+INFANTRYFACTORYOFFSET = 0x53b0
+
+# Offsets inside FactoryClass
+PERCENTAGECOMPLETEOFFSET = 0x24    # Percentage complete of the unit being built
+QUEUEDUNITSAMOUNT = 0x50           # Number of queued units (not used for Buildings)
+QUEUEDUNITSPTROFFSET = 0x44        # Pointer to queued units array (not used for Buildings)
+
+# Offsets inside technoTypeClass
+UNITNAMEOFFSET = 0x64             # Offset to read 20 bytes string for unit name
+
+# Offsets in technoClass to get to technoType pointer.
+TECHNOCLASS_TO_TECHNOTYPE_INFANTRY_OFFSET = 0x6c0  # For Infantry factories
+TECHNOCLASS_TO_TECHNOTYPE_BUILDINGS_OFFSET = 0x520 # For Buildings factories
+TECHNOCLASS_TO_TECHNOTYPE_UNIT_OFFSET = 0x6c4        # For Tanks, Aircraft, Ships, and Defenses
+
+# Global factory type offsets relative to INFANTRYFACTORYOFFSET
+AIRCRAFT_FACTORY_OFFSET = INFANTRYFACTORYOFFSET - 4
+INFANTRY_FACTORY_OFFSET = INFANTRYFACTORYOFFSET
+VEHICLES_FACTORY_OFFSET = INFANTRYFACTORYOFFSET + 4
+SHIPS_FACTORY_OFFSET = INFANTRYFACTORYOFFSET + 8
+BUILDINGS_FACTORY_OFFSET = INFANTRYFACTORYOFFSET + 12
+DEFENSES_FACTORY_OFFSET = INFANTRYFACTORYOFFSET + 28
+
+# Global list of factory types (name, offset)
+FACTORIES = [
+    ("Aircraft", AIRCRAFT_FACTORY_OFFSET),
+    ("Infantry", INFANTRY_FACTORY_OFFSET),
+    ("Vehicles", VEHICLES_FACTORY_OFFSET),
+    ("Ships", SHIPS_FACTORY_OFFSET),
+    ("Buildings", BUILDINGS_FACTORY_OFFSET),
+    ("Defenses", DEFENSES_FACTORY_OFFSET),
+]
 
 def find_pid_by_name(name):
     for proc in psutil.process_iter(['pid', 'name']):
@@ -13,98 +50,177 @@ def find_pid_by_name(name):
 def read_process_memory(process_handle, address, size):
     buffer = ctypes.create_string_buffer(size)
     bytesRead = ctypes.c_size_t()
-    if ctypes.windll.kernel32.ReadProcessMemory(process_handle, address, buffer, size, ctypes.byref(bytesRead)):
-        return buffer.raw
-    else:
-        return None
+    try:
+        if ctypes.windll.kernel32.ReadProcessMemory(process_handle, address, buffer, size, ctypes.byref(bytesRead)):
+            return buffer.raw
+        else:
+            raise ctypes.WinError()
+    except OSError as e:
+        if e.winerror == 299:  # Partial read; return None
+            return None
+        else:
+            raise
 
-def main():
-    # Locate the target process
+def get_unit_name_from_techno_type(techno_type_ptr, process_handle, player_number):
+    """
+    Given a pointer to a technoTypeClass, add UNITNAMEOFFSET and read 20 bytes for the unit name.
+    """
+    string_address = techno_type_ptr + UNITNAMEOFFSET
+    string_data = read_process_memory(process_handle, string_address, 20)
+    if string_data is None:
+        return False
+    techno_string = string_data.split(b'\x00')[0].decode('utf-8', errors='replace')
+    return techno_string
+
+def get_unit_name_from_techno_class(techno_class_ptr, process_handle, player_number, techno_offset):
+    """
+    Given a pointer to a technoClass, add the given techno_offset to get the technoType pointer,
+    then return the unit name from that technoType pointer.
+    """
+    techno_type_ptr_address = techno_class_ptr + techno_offset
+    techno_type_ptr_data = read_process_memory(process_handle, techno_type_ptr_address, 4)
+    if techno_type_ptr_data is None:
+        return False
+    techno_type_ptr = ctypes.c_uint32.from_buffer_copy(techno_type_ptr_data).value
+    return get_unit_name_from_techno_type(techno_type_ptr, process_handle, player_number)
+
+def process_factory(realClassBase, process_handle, player_number, factory_offset, factory_name):
+    """
+    Process a single factory.
+    For Buildings, no queued unit information is processed.
+    For other factories, if the factory pointer is allocated and active (nonzero progress or queue),
+    prints the percentage complete, current unit being built, and queued units.
+    """
+    factory_ptr_address = realClassBase + factory_offset
+    factory_ptr_data = read_process_memory(process_handle, factory_ptr_address, 4)
+    if factory_ptr_data is None:
+        return  # Factory pointer not allocated.
+    factory_ptr = ctypes.c_uint32.from_buffer_copy(factory_ptr_data).value
+    if factory_ptr == 0:
+        return
+
+    # Read percentage complete from FactoryClass.
+    percentage_data = read_process_memory(process_handle, factory_ptr + PERCENTAGECOMPLETEOFFSET, 4)
+    if percentage_data is None:
+        return
+    percentage_val = ctypes.c_uint32.from_buffer_copy(percentage_data).value
+    percentage_val = 100 / 54 * percentage_val
+
+    # For factories other than Buildings, read the queued units amount.
+    queued_units_val = 0
+    if factory_name != "Buildings":
+        queued_units_data = read_process_memory(process_handle, factory_ptr + QUEUEDUNITSAMOUNT, 4)
+        if queued_units_data is None:
+            return
+        queued_units_val = ctypes.c_uint32.from_buffer_copy(queued_units_data).value
+
+    # If nothing is being built (no progress and no queued units for non-buildings), skip output.
+    if percentage_val == 0 and queued_units_val == 0:
+        return
+
+    print(f"Player {player_number} ({factory_name}): Complete: {percentage_val}")
+
+    if factory_name != "Buildings":
+        print(f"Player {player_number} ({factory_name}): Queued amount: {queued_units_val}")
+
+    # Read the technoClass pointer from FactoryClass (offset 0x58)
+    techno_class_ptr_address = factory_ptr + 0x58
+    techno_class_ptr_data = read_process_memory(process_handle, techno_class_ptr_address, 4)
+    if techno_class_ptr_data is None:
+        return
+    techno_class_ptr = ctypes.c_uint32.from_buffer_copy(techno_class_ptr_data).value
+
+    # Choose the appropriate offset based on the factory type.
+    if factory_name == "Buildings":
+        techno_offset = TECHNOCLASS_TO_TECHNOTYPE_BUILDINGS_OFFSET
+    elif factory_name == "Infantry":
+        techno_offset = TECHNOCLASS_TO_TECHNOTYPE_INFANTRY_OFFSET
+    elif factory_name in ("Aircraft", "Vehicles", "Ships", "Defenses"):
+        techno_offset = TECHNOCLASS_TO_TECHNOTYPE_UNIT_OFFSET
+    else:
+        techno_offset = TECHNOCLASS_TO_TECHNOTYPE_UNIT_OFFSET
+
+    unit_name = get_unit_name_from_techno_class(techno_class_ptr, process_handle, player_number, techno_offset)
+    if not unit_name:
+        return
+    print(f"Player {player_number} ({factory_name}) is building: {unit_name}")
+
+    # Process queued units only if this factory is not Buildings.
+    if factory_name != "Buildings":
+        queued_units_ptr_address = factory_ptr + QUEUEDUNITSPTROFFSET
+        queued_units_ptr_data = read_process_memory(process_handle, queued_units_ptr_address, 4)
+        if queued_units_ptr_data is None:
+            return
+        queued_units_ptr = ctypes.c_uint32.from_buffer_copy(queued_units_ptr_data).value
+        queued_units_list = []
+        for j in range(queued_units_val):
+            next_unit_ptr_address = queued_units_ptr + j * 4
+            next_unit_ptr_data = read_process_memory(process_handle, next_unit_ptr_address, 4)
+            if next_unit_ptr_data is None:
+                queued_units_list.append(False)
+                continue
+            next_unit_ptr = ctypes.c_uint32.from_buffer_copy(next_unit_ptr_data).value
+            # For queued units, assume the pointer is already a technoType pointer.
+            next_unit_name = get_unit_name_from_techno_type(next_unit_ptr, process_handle, player_number)
+            queued_units_list.append(next_unit_name)
+        print(f"Player {player_number} ({factory_name}): Queued units: {queued_units_list}")
+
+def read_techno_types():
     pid = find_pid_by_name("gamemd-spawn.exe")
     if pid is None:
-        print("Process 'gamemd-spawn.exe' not found.")
+        print("Could not find process")
         return
 
-    # Open process with required access
     process_handle = ctypes.windll.kernel32.OpenProcess(
         wintypes.DWORD(0x0010 | 0x0020 | 0x0008 | 0x0010), False, pid)
-    if not process_handle:
-        print("Failed to open process.")
-        return
 
-    # Fixed addresses as per your original code
+    # Fixed base pointers.
     fixedPoint = 0xa8b230
     classBaseArrayPtr = 0xa8022c
 
-    # Read fixed point value
-    fixedPointValue_raw = read_process_memory(process_handle, fixedPoint, 4)
-    if fixedPointValue_raw is None:
-        print("Failed to read fixedPoint.")
+    fixedPointData = read_process_memory(process_handle, fixedPoint, 4)
+    if fixedPointData is None:
+        print("Failed to read fixedPoint")
+        ctypes.windll.kernel32.CloseHandle(process_handle)
         return
-    fixedPointValue = ctypes.c_uint32.from_buffer_copy(fixedPointValue_raw).value
+    fixedPointValue = ctypes.c_uint32.from_buffer_copy(fixedPointData).value
 
-    # Read class base array pointer
-    classBaseArray_raw = read_process_memory(process_handle, classBaseArrayPtr, 4)
-    if classBaseArray_raw is None:
-        print("Failed to read classBaseArray.")
+    classBaseArrayData = read_process_memory(process_handle, classBaseArrayPtr, 4)
+    if classBaseArrayData is None:
+        print("Failed to read classBaseArrayPtr")
+        ctypes.windll.kernel32.CloseHandle(process_handle)
         return
-    classBaseArray = ctypes.c_uint32.from_buffer_copy(classBaseArray_raw).value
+    classBaseArray = ctypes.c_uint32.from_buffer_copy(classBaseArrayData).value
 
-    # Compute the base pointer for the class base array for player 0
-    classbasearray = fixedPointValue + 4480
+    # Calculate the start of the player base pointer array.
+    classbasearray = fixedPointValue + 1120 * 4
 
-    # Read the class pointer for player 0
-    player_pointer_address = classbasearray
-    classBasePtr_raw = read_process_memory(process_handle, player_pointer_address, 4)
-    if classBasePtr_raw is None:
-        print("Failed to read player pointer at address:", hex(player_pointer_address))
-        return
-    classBasePtr = ctypes.c_uint32.from_buffer_copy(classBasePtr_raw).value
-
-    if classBasePtr == INVALIDCLASS:
-        print("Invalid class pointer for player 0.")
-        return
-
-    # Calculate the real class base pointer address
-    realClassBasePtr = classBasePtr * 4 + classBaseArray
-    realClassBase_raw = read_process_memory(process_handle, realClassBasePtr, 4)
-    if realClassBase_raw is None:
-        print("Failed to read real class base pointer at address:", hex(realClassBasePtr))
-        return
-    realClassBase = ctypes.c_uint32.from_buffer_copy(realClassBase_raw).value
-
-    # The player base address is now determined.
-    player_base = realClassBase
-
-    print(f"Player base address: {hex(player_base)}")
-    print("Enter hexadecimal offsets (e.g., 0x557c) to see the pointer at that location.")
-    print("Enter 'q' to exit.\n")
-
-    # Loop to allow user to enter offsets continuously
-    while True:
-        offset_input = input("Enter offset (hex): ").strip()
-        if offset_input.lower() == 'q':
-            break
-
-        try:
-            user_offset = int(offset_input, 16)
-        except ValueError:
-            print("Invalid input. Please enter a valid hexadecimal number or 'q' to quit.")
+    for i in range(MAXPLAYERS):
+        classBaseData = read_process_memory(process_handle, classbasearray, 4)
+        classbasearray += 4
+        if classBaseData is None:
+            continue
+        classBasePtr = ctypes.c_uint32.from_buffer_copy(classBaseData).value
+        if classBasePtr == INVALIDCLASS:
             continue
 
-        # Calculate the pointer address using the user-supplied offset
-        pointer_address = player_base + user_offset
-        print(f"Computed address: {hex(pointer_address)}")
+        # Convert pointer index into an absolute address.
+        realClassBasePtr = classBasePtr * 4 + classBaseArray
+        realClassBaseData = read_process_memory(process_handle, realClassBasePtr, 4)
+        if realClassBaseData is None:
+            continue
+        realClassBase = ctypes.c_uint32.from_buffer_copy(realClassBaseData).value
 
-        # Read the value at the computed pointer address (assuming it's a pointer)
-        pointer_value_raw = read_process_memory(process_handle, pointer_address, 4)
-        if pointer_value_raw is None:
-            print(f"Failed to read pointer value at address {hex(pointer_address)}.")
-        else:
-            pointer_value = ctypes.c_uint32.from_buffer_copy(pointer_value_raw).value
-            print(f"Value at {hex(pointer_address)}: {hex(pointer_value)}")
+        # Process each factory type for this player.
+        for factory_name, offset in FACTORIES:
+            process_factory(realClassBase, process_handle, i, offset, factory_name)
 
     ctypes.windll.kernel32.CloseHandle(process_handle)
+
+def main():
+    while True:
+        read_techno_types()
+        time.sleep(0.5)
 
 if __name__ == "__main__":
     main()

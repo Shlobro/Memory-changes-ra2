@@ -9,7 +9,7 @@ DEFAULT_SCAN_SIZE = 0x200  # Default scan size in bytes (512 bytes)
 STRING_READ_SIZE = 32  # Fallback number of bytes to read when in "String" mode
 MAXPLAYERS = 8
 INVALIDCLASS = 0xffffffff
-RANDOMPTROFFSET = 0x53b0  # This pointer offset may change over time
+RANDOMPTROFFSET = 0x53b4  # This pointer offset may change over time
 
 # Offsets used for pointer chasing (from your original code)
 FIXED_POINT_ADDR = 0xa8b230
